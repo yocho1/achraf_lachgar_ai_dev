@@ -1,0 +1,186 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { Bot, Expand, Loader2, Minimize2, Send } from "lucide-react";
+import type { Profile } from "@/lib/profile";
+
+export function AiTwinWidget({ profile }: { profile: Profile }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isFull, setIsFull] = useState(false);
+  const [localInput, setLocalInput] = useState("");
+  const messagesRef = useRef<HTMLDivElement>(null);
+
+  const chatHook = useChat({
+    id: "ai-twin",
+    api: "/api/ai-twin",
+    body: { resume: profile },
+    onError: (error) => {
+      console.error("AI Twin error:", error);
+    },
+  });
+
+  const { messages, setMessages, isLoading, error, status } = chatHook;
+
+  const [isSending, setIsSending] = useState(false);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!localInput.trim() || isSending) return;
+    
+    const userMessage = { role: "user" as const, content: localInput, id: Date.now().toString() };
+    setLocalInput(""); // Clear input immediately
+    
+    // Add user message to state
+    setMessages([...messages, userMessage]);
+    setIsSending(true);
+    
+    try {
+      const response = await fetch("/api/ai-twin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          resume: profile,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantMessage = "";
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          assistantMessage += chunk;
+          
+          // Update messages with streaming content
+          setMessages([
+            ...messages,
+            userMessage,
+            { role: "assistant" as const, content: assistantMessage, id: (Date.now() + 1).toString() }
+          ]);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener("open-ai-widget", handler as EventListener);
+    return () => window.removeEventListener("open-ai-widget", handler as EventListener);
+  }, []);
+
+  useEffect(() => {
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-40">
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="glass flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white shadow-lg"
+        >
+          <Bot className="h-4 w-4 text-cyan-300" />
+          AI Twin
+        </button>
+      )}
+
+      {isOpen && (
+        <div
+          className={`glass-strong relative max-w-[92vw] rounded-3xl border border-white/15 bg-gradient-to-b from-slate-900/90 to-slate-950/95 shadow-2xl ${
+            isFull ? "h-[70vh] w-[420px] sm:w-[520px]" : "w-[360px]"
+          }`}
+        >
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2 text-sm uppercase tracking-[0.2em] text-slate-300">
+              <Bot className="h-4 w-4 text-cyan-300" /> AI Twin
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="rounded-full border border-white/10 p-2 hover:border-white/30"
+                aria-label="Minimize chat"
+              >
+                <Minimize2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setIsFull((open) => !open)}
+                className="rounded-full border border-white/10 p-2 hover:border-white/30"
+                aria-label="Toggle full-screen"
+              >
+                {isFull ? <Minimize2 className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="divider" />
+
+          <div
+            ref={messagesRef}
+            className={`overflow-y-auto px-4 py-3 space-y-3 text-sm text-slate-100 ${
+              isFull ? "max-h-[52vh]" : "max-h-[360px]"
+            }`}
+          >
+            {messages.length === 0 && (
+              <div className="text-slate-400">
+                Ask anything a recruiter would: &quot;Does this engineer have RAG experience?&quot;, &quot;Explain the fine-tuning pipeline&quot;, &quot;What tools are in production?&quot;
+              </div>
+            )}
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.role === "user" ? "bg-cyan-300 text-slate-900" : "bg-white/10 text-white"}`}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex items-center gap-2 text-slate-300">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Typing...
+              </div>
+            )}
+            {error && <div className="text-red-300">{error.message}</div>}
+          </div>
+
+          <form
+            onSubmit={handleFormSubmit}
+            className="flex items-center gap-2 px-4 py-3"
+          >
+            <input
+              value={localInput}
+              onChange={(e) => setLocalInput(e.target.value)}
+              placeholder="Ask about Achraf's experience"
+              className="h-11 flex-1 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={isSending || localInput.trim().length === 0}
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 text-slate-900 shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
