@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight, MessageCircle, Database, Settings, Code, Layers } from "lucide-react";
 import { HeroCanvas } from "./hero-canvas";
 import type { Profile } from "@/lib/profile";
 
@@ -16,7 +16,7 @@ export function Hero({ profile }: { profile: Profile }) {
       <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/70 pointer-events-none" />
       <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6">
         <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-slate-300/80">
-          <span className="glass-strong rounded-full px-4 py-2">AI Systems Engineer</span>
+          <span className="glass-strong rounded-full px-4 py-2">Junior AI Engineer</span>
           <span className="glass rounded-full px-4 py-2">Generative AI • RAG • Agents</span>
           <span className="glass rounded-full px-4 py-2">Casablanca, Morocco</span>
         </div>
@@ -95,12 +95,62 @@ export function Hero({ profile }: { profile: Profile }) {
                 <h3 className="mt-2 text-2xl font-semibold text-white">End-to-end AI delivery</h3>
               </div>
               <div className="space-y-4">
-                {profile.specialties.map((item) => (
-                  <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 shadow-[0_0_12px_rgba(126,247,214,0.55)]" />
-                    <p className="text-sm text-slate-200">{item}</p>
-                  </div>
-                ))}
+                {profile.specialties.map((item, index) => {
+                  const capabilityInfo: Record<string, { icon: any; project: string; metric: string }> = {
+                    "Retrieval-augmented generation architectures": {
+                      icon: Database,
+                      project: "Multimodal-AI RAG App",
+                      metric: "-15% latency",
+                    },
+                    "LLM fine-tuning with LoRA and QLoRA": {
+                      icon: Settings,
+                      project: "Legal-FAQ-Assistant",
+                      metric: "+20% accuracy",
+                    },
+                    "AI application development with FastAPI and React": {
+                      icon: Code,
+                      project: "SheetBrain-AI",
+                      metric: "Enterprise automation",
+                    },
+                    "Full-stack AI integration patterns": {
+                      icon: Layers,
+                      project: "Multiple projects",
+                      metric: "4+ years experience",
+                    },
+                  };
+
+                  const info = capabilityInfo[item] || { icon: Code, project: "See portfolio", metric: "" };
+                  const IconComponent = info.icon;
+
+                  return (
+                    <motion.div
+                      key={item}
+                      className="group relative flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition-all hover:border-cyan-300/30 hover:bg-white/10"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <IconComponent className="mt-0.5 h-5 w-5 text-cyan-300" />
+                      <p className="flex-1 text-sm text-slate-200">{item}</p>
+                      
+                      {/* Tooltip */}
+                      <motion.div
+                        className="pointer-events-none absolute -top-16 left-1/2 z-50 -translate-x-1/2 rounded-xl border border-cyan-300/30 bg-slate-900/95 px-4 py-2 text-center opacity-0 shadow-xl backdrop-blur-sm group-hover:opacity-100"
+                        initial={{ opacity: 0, y: 10 }}
+                        whileHover={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <p className="whitespace-nowrap text-xs font-medium text-cyan-300">
+                          {info.project}
+                        </p>
+                        {info.metric && (
+                          <p className="whitespace-nowrap text-xs text-slate-400">
+                            {info.metric}
+                          </p>
+                        )}
+                      </motion.div>
+                    </motion.div>
+                  );
+                })}
               </div>
               <div className="divider" />
               <div className="grid gap-3 text-sm text-slate-300">
@@ -110,7 +160,7 @@ export function Hero({ profile }: { profile: Profile }) {
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Availability</span>
-                  <span className="text-white">Open for senior AI roles & consulting</span>
+                  <span className="text-white">Open for junior AI roles & consulting</span>
                 </div>
               </div>
             </div>

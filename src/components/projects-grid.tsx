@@ -15,21 +15,29 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
         </p>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
-        {projects.map((project, idx) => (
-          <motion.div
-            key={project.title}
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ delay: idx * 0.05, duration: 0.6, ease: "easeOut" }}
-            whileHover={{ y: -6 }}
-            className="glass relative overflow-hidden rounded-3xl border border-white/10 p-6 shadow-xl"
-          >
+        {projects.map((project, idx) => {
+          const projectId = project.title.toLowerCase().replace(/\s+/g, "-");
+          return (
+            <motion.div
+              key={project.title}
+              id={projectId}
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ delay: idx * 0.05, duration: 0.6, ease: "easeOut" }}
+              whileHover={{ y: -6 }}
+              className="glass relative overflow-hidden rounded-3xl border border-white/10 p-6 shadow-xl scroll-mt-24"
+            >
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-cyan-200/10" />
             <div className="relative space-y-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-2xl font-semibold text-white">{project.title}</h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-2xl font-semibold text-white">{project.title}</h3>
+                    {project.period && (
+                      <span className="text-xs text-slate-500">{project.period}</span>
+                    )}
+                  </div>
                   <p className="text-sm text-slate-400">{project.problem}</p>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
@@ -80,7 +88,8 @@ export function ProjectsGrid({ projects }: { projects: Project[] }) {
               </div>
             </div>
           </motion.div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

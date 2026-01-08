@@ -46,9 +46,21 @@ export function CtaFooter({ profile }: { profile: Profile }) {
           </a>
         </div>
       </div>
-      <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-400">
-        <span>© {new Date().getFullYear()} Achraf Lachgar</span>
-        <span className="rounded-full bg-white/10 px-3 py-1">Casablanca, Morocco</span>
+      <div className="mt-6 flex flex-col gap-3 text-xs text-slate-400">
+        <div className="flex flex-wrap items-center gap-3">
+          <span>© {new Date().getFullYear()} Achraf Lachgar</span>
+          <span className="rounded-full bg-white/10 px-3 py-1">Casablanca, Morocco</span>
+        </div>
+        {profile.languages && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-slate-500">Languages:</span>
+            {profile.languages.map((lang) => (
+              <span key={lang.language} className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                {lang.language} — {lang.proficiency}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </footer>
   );

@@ -1,5 +1,6 @@
 export type Project = {
   title: string;
+  period?: string;
   problem: string;
   solution: string;
   tech: string[];
@@ -33,9 +34,9 @@ export const profile = {
   contact: {
     email: "achraf.lachgar.contact@gmail.com",
     phone: "+212674147995",
-    linkedin: "https://linkedin.com/in/achraf-lachgar",
-    github: "https://github.com/achraflachgar",
-    resume: "https://achraflachgar.me/resume-achraf-lachgar.pdf",
+    linkedin: "https://www.linkedin.com/in/achraf-lachgar/?locale=en_US",
+    github: "https://github.com/yocho1",
+    resume: "http://localhost:3000/resume-achraf-lachgar.pdf",
   },
   specialties: [
     "Retrieval-augmented generation architectures",
@@ -56,7 +57,7 @@ export const profile = {
     },
     {
       label: "AI projects",
-      value: "3",
+      value: "6",
       description: "Production-ready AI applications deployed",
     },
     {
@@ -76,12 +77,13 @@ export const profile = {
       impact: "Automated error detection and formula auditing for enterprise spreadsheets with real-time recommendations.",
       metrics: ["Enterprise automation", "Real-time auditing"],
       links: {
-        demo: "https://github.com/achraflachgar/sheetbrain-ai",
-        source: "https://github.com/achraflachgar/sheetbrain-ai",
+        demo: "https://github.com/yocho1/sheetbrain-ai",
+        source: "https://github.com/yocho1/sheetbrain-ai",
       },
     },
     {
       title: "Legal-FAQ-Assistant",
+      period: "10/2025 — 11/2025",
       problem:
         "Legal Q&A systems lacked domain-specific accuracy and data privacy compliance for sensitive legal queries.",
       solution:
@@ -90,8 +92,8 @@ export const profile = {
       impact: "+20% domain accuracy with production-ready legal Q&A and privacy compliance.",
       metrics: ["+20% domain accuracy", "Privacy compliant"],
       links: {
-        demo: "https://github.com/achraflachgar/legal-faq-assistant",
-        source: "https://github.com/achraflachgar/legal-faq-assistant",
+        demo: "https://github.com/yocho1/legal-faq-assistant",
+        source: "https://github.com/yocho1/legal-faq-assistant",
       },
     },
     {
@@ -104,11 +106,52 @@ export const profile = {
       impact: "-15% retrieval latency for multi-format document queries with hybrid search.",
       metrics: ["-15% retrieval latency", "Multi-format support"],
       links: {
-        demo: "https://github.com/achraflachgar/multimodal-rag-app",
-        source: "https://github.com/achraflachgar/multimodal-rag-app",
+        demo: "https://github.com/yocho1/multimodal-rag-app",
+        source: "https://github.com/yocho1/multimodal-rag-app",
       },
     },
-
+    {
+      title: "Babel-Fish-Assistant",
+      problem:
+        "Real-time voice translation systems lacked seamless integration of speech recognition, translation, and natural voice synthesis for cross-language communication.",
+      solution:
+        "Developed a production-ready real-time voice translator integrating Deepgram STT and ElevenLabs TTS with GPT-4o-mini for high-accuracy cross-language processing. Built full-stack application with Next.js 14 and Flask backend for low-latency audio streaming.",
+      tech: ["Deepgram STT", "GPT-4o-mini", "ElevenLabs TTS", "Next.js 14", "Flask", "Python", "TypeScript"],
+      impact: "Production-ready voice AI system enabling real-time multilingual communication with natural speech synthesis.",
+      metrics: ["Real-time translation", "Voice AI"],
+      links: {
+        demo: "https://github.com/yocho1/babel-fish-assistant",
+        source: "https://github.com/yocho1/babel-fish-assistant",
+      },
+    },
+    {
+      title: "Multi-Agent-AI-System",
+      problem:
+        "Complex AI tasks required autonomous orchestration of multiple specialized agents with tool-based workflows and collaborative decision-making.",
+      solution:
+        "Engineered a Multi-Agent AI System capable of autonomous task decomposition and execution using tool-based workflows and collaborative agent architectures. Implemented agent coordination patterns with TypeScript for reliable multi-step task completion.",
+      tech: ["TypeScript", "Multi-Agent Systems", "Tool-Based Workflows", "AI Orchestration", "LangChain"],
+      impact: "Advanced agentic AI system for autonomous task execution with intelligent agent collaboration.",
+      metrics: ["Autonomous agents", "Task orchestration"],
+      links: {
+        demo: "https://github.com/yocho1/multi-agent-ai-system",
+        source: "https://github.com/yocho1/multi-agent-ai-system",
+      },
+    },
+    {
+      title: "AI-Powered-Meeting-Assistant",
+      problem:
+        "Manual meeting note-taking consumed significant time while missing key action items and decisions requiring follow-up.",
+      solution:
+        "Built a modern meeting intelligence platform that transcribes live audio and generates actionable summaries using state-of-the-art NLP models. Implemented real-time speech-to-text processing with Python and Flask, reducing manual note-taking time.",
+      tech: ["Python", "Flask", "Speech-to-Text", "NLP", "Whisper API", "OpenAI"],
+      impact: "Intelligent meeting transcription and summarization reducing manual documentation overhead.",
+      metrics: ["Meeting intelligence", "Actionable summaries"],
+      links: {
+        demo: "https://github.com/yocho1/ai-meeting-assistant",
+        source: "https://github.com/yocho1/ai-meeting-assistant",
+      },
+    },
   ],
   stack: [
     { name: "Large Language Models", usage: "Gemini, LLaMA, Mistral - fine-tuning and inference" },
@@ -155,6 +198,20 @@ export const profile = {
         "Specialized in the MERN stack and professional agile development methodologies.",
       ],
       tech: ["MERN Stack", "Agile", "Software Architecture"],
+    },
+  ],
+  languages: [
+    {
+      language: "Arabic",
+      proficiency: "Full Professional Proficiency",
+    },
+    {
+      language: "French",
+      proficiency: "Limited Working Proficiency",
+    },
+    {
+      language: "English",
+      proficiency: "Full Professional Proficiency",
     },
   ],
 };

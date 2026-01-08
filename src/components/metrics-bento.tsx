@@ -5,6 +5,20 @@ import { CheckCircle2, Gauge, ShieldCheck, Sparkles } from "lucide-react";
 import type { Profile } from "@/lib/profile";
 
 export function MetricsBento({ profile }: { profile: Profile }) {
+  const metricToProject: Record<string, string> = {
+    "Fine-tuning accuracy": "legal-faq-assistant",
+    "Retrieval latency": "multimodal-ai-rag-app",
+    "AI projects": "projects",
+  };
+
+  const handleMetricClick = (label: string) => {
+    const projectId = metricToProject[label];
+    if (projectId) {
+      const element = document.getElementById(projectId);
+      element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   return (
     <section className="space-y-6" id="proof">
       <div className="flex flex-col gap-2">
@@ -28,13 +42,27 @@ export function MetricsBento({ profile }: { profile: Profile }) {
             Golden sets + adversarial synthetic tests. Blocking regressions and monitoring hallucination risk before release.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {profile.metrics.slice(0, 4).map((metric) => (
-              <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm text-slate-400">{metric.label}</p>
-                <p className="text-2xl font-semibold text-white">{metric.value}</p>
-                <p className="text-xs text-slate-400">{metric.description}</p>
-              </div>
-            ))}
+            {profile.metrics.slice(0, 4).map((metric) => {
+              const isClickable = metricToProject[metric.label];
+              return (
+                <motion.div
+                  key={metric.label}
+                  onClick={() => handleMetricClick(metric.label)}
+                  className={`rounded-2xl border border-white/10 bg-white/5 p-4 ${
+                    isClickable ? "cursor-pointer transition-all hover:border-cyan-300/50 hover:bg-white/10" : ""
+                  }`}
+                  whileHover={isClickable ? { scale: 1.05 } : {}}
+                  whileTap={isClickable ? { scale: 0.98 } : {}}
+                >
+                  <p className="text-sm text-slate-400">{metric.label}</p>
+                  <p className="text-2xl font-semibold text-white">{metric.value}</p>
+                  <p className="text-xs text-slate-400">{metric.description}</p>
+                  {isClickable && (
+                    <p className="mt-2 text-[10px] uppercase tracking-wider text-cyan-300">Click to view project →</p>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
 

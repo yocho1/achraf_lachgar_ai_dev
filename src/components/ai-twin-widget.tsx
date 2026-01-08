@@ -13,8 +13,6 @@ export function AiTwinWidget({ profile }: { profile: Profile }) {
 
   const chatHook = useChat({
     id: "ai-twin",
-    api: "/api/ai-twin",
-    body: { resume: profile },
     onError: (error) => {
       console.error("AI Twin error:", error);
     },
