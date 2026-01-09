@@ -77,8 +77,8 @@ export const profile = {
       impact: "Automated error detection and formula auditing for enterprise spreadsheets with real-time recommendations.",
       metrics: ["Enterprise automation", "Real-time auditing"],
       links: {
-        demo: "https://github.com/yocho1/sheetbrain-ai",
-        source: "https://github.com/yocho1/sheetbrain-ai",
+        demo: "https://github.com/yocho1/SheetBrain-AI",
+        source: "https://github.com/yocho1/SheetBrain-AI",
       },
     },
     {
@@ -92,8 +92,8 @@ export const profile = {
       impact: "+20% domain accuracy with production-ready legal Q&A and privacy compliance.",
       metrics: ["+20% domain accuracy", "Privacy compliant"],
       links: {
-        demo: "https://github.com/yocho1/legal-faq-assistant",
-        source: "https://github.com/yocho1/legal-faq-assistant",
+        demo: "https://github.com/yocho1/legal-FAQ-assistant",
+        source: "https://github.com/yocho1/legal-FAQ-assistant",
       },
     },
     {
@@ -106,8 +106,8 @@ export const profile = {
       impact: "-15% retrieval latency for multi-format document queries with hybrid search.",
       metrics: ["-15% retrieval latency", "Multi-format support"],
       links: {
-        demo: "https://github.com/yocho1/multimodal-rag-app",
-        source: "https://github.com/yocho1/multimodal-rag-app",
+        demo: "https://github.com/yocho1/Multimodal-AI",
+        source: "https://github.com/yocho1/Multimodal-AI",
       },
     },
     {
@@ -134,8 +134,8 @@ export const profile = {
       impact: "Advanced agentic AI system for autonomous task execution with intelligent agent collaboration.",
       metrics: ["Autonomous agents", "Task orchestration"],
       links: {
-        demo: "https://github.com/yocho1/multi-agent-ai-system",
-        source: "https://github.com/yocho1/multi-agent-ai-system",
+        demo: "https://github.com/yocho1/Multi-Agent-AI-System",
+        source: "https://github.com/yocho1/Multi-Agent-AI-System",
       },
     },
     {
@@ -148,8 +148,8 @@ export const profile = {
       impact: "Intelligent meeting transcription and summarization reducing manual documentation overhead.",
       metrics: ["Meeting intelligence", "Actionable summaries"],
       links: {
-        demo: "https://github.com/yocho1/ai-meeting-assistant",
-        source: "https://github.com/yocho1/ai-meeting-assistant",
+        demo: "https://github.com/yocho1/AI-Powered-Meeting-Assistant",
+        source: "https://github.com/yocho1/AI-Powered-Meeting-Assistant",
       },
     },
   ],
