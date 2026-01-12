@@ -1,78 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useChat } from "@ai-sdk/react";
-import { Bot, Expand, Loader2, Minimize2, Send } from "lucide-react";
+import { Bot, Expand, Minimize2, Send } from "lucide-react";
 import type { Profile } from "@/lib/profile";
 
 export function AiTwinWidget({ profile }: { profile: Profile }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isFull, setIsFull] = useState(false);
-  const [localInput, setLocalInput] = useState("");
+  const [messages, setMessages] = useState<Array<{ role: string; content: string; id: string }>>([]);
+  const [input, setInput] = useState("");
   const messagesRef = useRef<HTMLDivElement>(null);
-
-  const chatHook = useChat({
-    id: "ai-twin",
-    onError: (error) => {
-      console.error("AI Twin error:", error);
-    },
-  });
-
-  const { messages, setMessages, isLoading, error, status } = chatHook;
-
-  const [isSending, setIsSending] = useState(false);
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!localInput.trim() || isSending) return;
-    
-    const userMessage = { role: "user" as const, content: localInput, id: Date.now().toString() };
-    setLocalInput(""); // Clear input immediately
-    
-    // Add user message to state
-    setMessages([...messages, userMessage]);
-    setIsSending(true);
-    
-    try {
-      const response = await fetch("/api/ai-twin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          resume: profile,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let assistantMessage = "";
-      
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          const chunk = decoder.decode(value);
-          assistantMessage += chunk;
-          
-          // Update messages with streaming content
-          setMessages([
-            ...messages,
-            userMessage,
-            { role: "assistant" as const, content: assistantMessage, id: (Date.now() + 1).toString() }
-          ]);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    } finally {
-      setIsSending(false);
-    }
-  };
 
   useEffect(() => {
     const handler = () => setIsOpen(true);
@@ -150,31 +87,30 @@ export function AiTwinWidget({ profile }: { profile: Profile }) {
                 </div>
               </div>
             ))}
-            {isLoading && (
-              <div className="flex items-center gap-2 text-slate-300">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Typing...
-              </div>
-            )}
-            {error && <div className="text-red-300">{error.message}</div>}
           </div>
 
           <form
-            onSubmit={handleFormSubmit}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (input.trim()) {
+                setMessages([...messages, { role: "user", content: input, id: Date.now().toString() }]);
+                setInput("");
+              }
+            }}
             className="flex items-center gap-2 px-4 py-3"
           >
             <input
-              value={localInput}
-              onChange={(e) => setLocalInput(e.target.value)}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about Achraf's experience"
               className="h-11 flex-1 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none"
             />
             <button
               type="submit"
-              disabled={isSending || localInput.trim().length === 0}
+              disabled={input.trim().length === 0}
               className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 text-slate-900 shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              <Send className="h-4 w-4" />
             </button>
           </form>
         </div>

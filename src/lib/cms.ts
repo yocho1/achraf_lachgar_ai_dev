@@ -13,7 +13,7 @@ export const sanityClient =
 
 export async function fetchFromSanity<T>(query: string, params?: QueryParams) {
   if (!sanityClient) return null;
-  return sanityClient.fetch<T>(query, params);
+  return sanityClient.fetch<T>(query, params || {});
 }
 
 export async function getProfileData(): Promise<typeof profile> {

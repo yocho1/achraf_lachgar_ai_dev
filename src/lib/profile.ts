@@ -10,6 +10,7 @@ export type Project = {
     demo: string;
     source: string;
   };
+  videoId?: string;
 };
 
 export type Experience = {
@@ -18,6 +19,15 @@ export type Experience = {
   period: string;
   achievements: string[];
   tech: string[];
+};
+
+export type Education = {
+  degree: string;
+  institution: string;
+  period: string;
+  achievements: string[];
+  skills: string[];
+  link?: string;
 };
 
 export type StackItem = {
@@ -80,6 +90,7 @@ export const profile = {
         demo: "https://github.com/yocho1/SheetBrain-AI",
         source: "https://github.com/yocho1/SheetBrain-AI",
       },
+      videoId: "shOBf2iYR_M",
     },
     {
       title: "Legal-FAQ-Assistant",
@@ -172,32 +183,59 @@ export const profile = {
       period: "01/2021 — Present",
       achievements: [
         "Designed and developed dynamic web applications using the MERN stack (MongoDB, Express.js, React.js, Node.js).",
-        "Integrated AI-powered features using LLM APIs (chatbots, document analysis, automation tools).",
+        "Created modern, responsive user interfaces utilizing Tailwind CSS, Bootstrap, and Sass.",
         "Developed and integrated secure REST APIs and managed authentication solutions like JWT and OAuth.",
+        "Managed database architectures and optimized query performance using Mongoose and PostgreSQL.",
         "Deployed and maintained production applications on cloud platforms including Vercel, Netlify, and Heroku.",
+        "Optimized website performance and SEO (Core Web Vitals) to improve search rankings and user retention.",
+        "Conceived and maintained custom WordPress sites, including theme and plugin development.",
+        "Developed interactive frontend functionality with JavaScript and backend logic in PHP.",
+        "Integrated AI-powered features using LLM APIs (chatbots, document analysis, automation tools).",
+        "Designed backend services for AI inference and data processing.",
       ],
-      tech: ["MERN Stack", "LLM APIs", "FastAPI", "React.js", "Tailwind CSS", "JWT/OAuth"],
+      tech: ["React.js", "React Native", "MongoDB", "Express.js", "Node.js", "HTML5/CSS3", "JavaScript ES6+", "Redux", "Tailwind CSS", "Bootstrap", "Sass", "JWT/OAuth", "Mongoose", "PostgreSQL", "Git/GitHub", "Docker", "Jest", "Postman", "Heroku", "AWS", "Netlify", "WordPress", "PHP", "LLM APIs", "FastAPI"],
     },
+  ],
+  education: [
     {
-      role: "AI Developer Professional Certificate",
-      org: "IBM",
+      degree: "Professional Certificate, AI Developer",
+      institution: "IBM",
       period: "01/2025 — 01/2026",
       achievements: [
-        "Completed intensive 10-course program focusing on Full Stack AI Development lifecycle.",
+        "Completed an intensive 10-course program focusing on the Full Stack AI Development lifecycle.",
         "Developed core competencies in Generative AI, Prompt Engineering, and building AI-powered applications.",
         "Gained hands-on experience in Python for Data Science, FastAPI/Flask, and creating specialized AI chatbots.",
       ],
-      tech: ["Python", "FastAPI", "Flask", "Generative AI", "Prompt Engineering"],
+      skills: ["FastAPI", "Model Fine-Tuning", "Prompt Engineering", "Large Language Models (LLM)", "Python", "QLoRA", "Retrieval-Augmented Generation (RAG)", "PEFT", "Generative AI"],
     },
     {
-      role: "Full Stack Developer Training",
-      org: "YouCode School",
-      period: "01/2019 — 01/2021",
+      degree: "Certification by Simplon in France and UM6P, Full Stack Developer",
+      institution: "YouCode School",
+      period: "10/2019 — 06/2021",
       achievements: [
         "Completed rigorous project-based training in modern web technologies and software architecture.",
         "Specialized in the MERN stack and professional agile development methodologies.",
       ],
-      tech: ["MERN Stack", "Agile", "Software Architecture"],
+      skills: ["React.js", "React Native", "MongoDB", "Express.js", "Node.js", "Agile Methodologies", "HTML5/CSS3", "JavaScript ES6+", "Redux", "CSS Frameworks", "Responsive Design", "Authentication & Authorization", "API Design", "Mongoose", "Data Modeling", "GitHub/GitLab", "Git", "NPM/Yarn", "Docker", "Jest", "Postman", "Debugging Tools", "Heroku", "AWS", "Netlify"],
+      link: "https://youcode.ma/",
+    },
+    {
+      degree: "Bachelor of Science, Physics & Chemistry",
+      institution: "Faculté Polydisciplinaire, Safi - UM6P",
+      period: "10/2015 — 08/2018",
+      achievements: [
+        "Completed foundational coursework in physical sciences and mathematical analysis.",
+      ],
+      skills: ["Physics", "Chemistry", "Mechanics", "Mathematics", "French"],
+    },
+    {
+      degree: "High School Diploma, Physics & Chemistry",
+      institution: "Lycée Kachkat",
+      period: "09/2014 — 06/2015",
+      achievements: [
+        "Focused on advanced mathematics, physical sciences, and chemical engineering foundations.",
+      ],
+      skills: ["Mathematics", "Physics", "Chemistry"],
     },
   ],
   languages: [

@@ -1,5 +1,6 @@
 import { AiTwinWidget } from "@/components/ai-twin-widget";
 import { CtaFooter } from "@/components/cta-footer";
+import { EducationSection } from "@/components/education-section";
 import { ExperienceTimeline } from "@/components/experience-timeline";
 import { Hero } from "@/components/hero";
 import { MetricsBento } from "@/components/metrics-bento";
@@ -18,6 +19,7 @@ export default async function Home() {
         <ProjectsGrid projects={profile.projects} />
         <StackOrbit stack={profile.stack} />
         <ExperienceTimeline experience={profile.experience} />
+        <EducationSection education={profile.education} />
         <CtaFooter profile={profile} />
       </main>
       <AiTwinWidget profile={profile} />
