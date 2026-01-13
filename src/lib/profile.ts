@@ -46,7 +46,7 @@ export const profile = {
     phone: "+212674147995",
     linkedin: "https://www.linkedin.com/in/achraf-lachgar/?locale=en_US",
     github: "https://github.com/yocho1",
-    resume: "http://localhost:3000/resume-achraf-lachgar.pdf",
+    resume: "/resume-achraf-lachgar.pdf",
   },
   specialties: [
     "Retrieval-augmented generation architectures",
