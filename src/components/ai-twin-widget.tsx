@@ -9,6 +9,7 @@ export function AiTwinWidget({ profile }: { profile: Profile }) {
   const [isFull, setIsFull] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: string; content: string; id: string }>>([]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -90,11 +91,62 @@ export function AiTwinWidget({ profile }: { profile: Profile }) {
           </div>
 
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              if (input.trim()) {
-                setMessages([...messages, { role: "user", content: input, id: Date.now().toString() }]);
-                setInput("");
+              if (!input.trim() || isLoading) return;
+
+              const userMessage = { role: "user", content: input, id: Date.now().toString() };
+              setMessages((prev) => [...prev, userMessage]);
+              setInput("");
+              setIsLoading(true);
+
+              try {
+                const response = await fetch("/api/ai-twin", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    messages: [...messages, userMessage],
+                    resume: profile,
+                  }),
+                });
+
+                if (!response.ok) {
+                  throw new Error(`API error: ${response.statusText}`);
+                }
+
+                const reader = response.body?.getReader();
+                const decoder = new TextDecoder();
+                let assistantMessage = "";
+                const assistantId = (Date.now() + 1).toString();
+
+                if (reader) {
+                  while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    assistantMessage += chunk;
+
+                    setMessages((prev) => {
+                      const updated = [...prev];
+                      const lastMsg = updated[updated.length - 1];
+                      if (lastMsg?.id === assistantId) {
+                        lastMsg.content = assistantMessage;
+                      } else {
+                        updated.push({ role: "assistant", content: assistantMessage, id: assistantId });
+                      }
+                      return updated;
+                    });
+                  }
+                }
+              } catch (error) {
+                console.error("AI Twin error:", error);
+                setMessages((prev) => [
+                  ...prev,
+                  { role: "assistant", content: "Sorry, I encountered an error. Please try again.", id: (Date.now() + 1).toString() },
+                ]);
+              } finally {
+                setIsLoading(false);
               }
             }}
             className="flex items-center gap-2 px-4 py-3"
@@ -102,12 +154,13 @@ export function AiTwinWidget({ profile }: { profile: Profile }) {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              disabled={isLoading}
               placeholder="Ask about Achraf's experience"
-              className="h-11 flex-1 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none"
+              className="h-11 flex-1 rounded-full border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none disabled:opacity-50"
             />
             <button
               type="submit"
-              disabled={input.trim().length === 0}
+              disabled={input.trim().length === 0 || isLoading}
               className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 text-slate-900 shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Send className="h-4 w-4" />
