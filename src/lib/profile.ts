@@ -106,6 +106,7 @@ export const profile = {
         demo: "https://github.com/yocho1/legal-FAQ-assistant",
         source: "https://github.com/yocho1/legal-FAQ-assistant",
       },
+      videoId: "p6OxBBaOl-o",
     },
     {
       title: "Multimodal-AI RAG App",
@@ -120,6 +121,7 @@ export const profile = {
         demo: "https://github.com/yocho1/Multimodal-AI",
         source: "https://github.com/yocho1/Multimodal-AI",
       },
+      videoId: "dhrlYs_mpko",
     },
     {
       title: "Babel-Fish-Assistant",
@@ -134,6 +136,7 @@ export const profile = {
         demo: "https://github.com/yocho1/babel-fish-assistant",
         source: "https://github.com/yocho1/babel-fish-assistant",
       },
+      videoId: "v239erBAwY8",
     },
     {
       title: "Multi-Agent-AI-System",
@@ -162,6 +165,7 @@ export const profile = {
         demo: "https://github.com/yocho1/AI-Powered-Meeting-Assistant",
         source: "https://github.com/yocho1/AI-Powered-Meeting-Assistant",
       },
+      videoId: "pdizEkwePwY",
     },
   ],
   stack: [
