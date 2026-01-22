@@ -151,6 +151,7 @@ export const profile = {
         demo: "https://github.com/yocho1/Multi-Agent-AI-System",
         source: "https://github.com/yocho1/Multi-Agent-AI-System",
       },
+      videoId: "APPPMiSEXJQ",
     },
     {
       title: "AI-Powered-Meeting-Assistant",
