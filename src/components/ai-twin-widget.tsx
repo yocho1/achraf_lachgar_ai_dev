@@ -111,39 +111,48 @@ export function AiTwinWidget({ profile }: { profile: Profile }) {
                 });
 
                 if (!response.ok) {
-                  throw new Error(`API error: ${response.statusText}`);
+                  const errorText = await response.text();
+                  console.error(`API error (${response.status}):`, errorText);
+                  throw new Error(`API error: ${response.status} ${response.statusText}`);
                 }
 
-                const reader = response.body?.getReader();
+                if (!response.body) {
+                  throw new Error("No response body from API");
+                }
+
+                const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let assistantMessage = "";
                 const assistantId = (Date.now() + 1).toString();
 
-                if (reader) {
-                  while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
 
-                    const chunk = decoder.decode(value);
-                    assistantMessage += chunk;
+                  const chunk = decoder.decode(value, { stream: true });
+                  assistantMessage += chunk;
 
-                    setMessages((prev) => {
-                      const updated = [...prev];
-                      const lastMsg = updated[updated.length - 1];
-                      if (lastMsg?.id === assistantId) {
-                        lastMsg.content = assistantMessage;
-                      } else {
-                        updated.push({ role: "assistant", content: assistantMessage, id: assistantId });
-                      }
-                      return updated;
-                    });
-                  }
+                  setMessages((prev) => {
+                    const updated = [...prev];
+                    const lastMsg = updated[updated.length - 1];
+                    if (lastMsg?.id === assistantId) {
+                      lastMsg.content = assistantMessage;
+                    } else {
+                      updated.push({ role: "assistant", content: assistantMessage, id: assistantId });
+                    }
+                    return updated;
+                  });
                 }
               } catch (error) {
                 console.error("AI Twin error:", error);
+                const errorMessage = error instanceof Error ? error.message : String(error);
                 setMessages((prev) => [
                   ...prev,
-                  { role: "assistant", content: "Sorry, I encountered an error. Please try again.", id: (Date.now() + 1).toString() },
+                  {
+                    role: "assistant",
+                    content: `Sorry, I encountered an error: ${errorMessage}`,
+                    id: (Date.now() + 1).toString(),
+                  },
                 ]);
               } finally {
                 setIsLoading(false);

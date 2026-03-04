@@ -12,9 +12,27 @@ const openrouter = createOpenAI({
 });
 
 export async function POST(req: Request) {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+
   try {
     if (!process.env.OPENROUTER_API_KEY) {
-      return new Response("Missing OPENROUTER_API_KEY", { status: 500 });
+      console.error("Missing OPENROUTER_API_KEY");
+      return new Response(JSON.stringify({ error: "Missing OPENROUTER_API_KEY" }), {
+        status: 500,
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!process.env.OPENROUTER_MODEL || !process.env.OPENROUTER_REFERER) {
+      console.error("Missing OPENROUTER_MODEL or OPENROUTER_REFERER");
+      return new Response(
+        JSON.stringify({ error: "Missing required environment variables" }),
+        { status: 500, headers: { ...headers, "Content-Type": "application/json" } }
+      );
     }
 
     const { messages, resume } = (await req.json()) as {
@@ -23,16 +41,22 @@ export async function POST(req: Request) {
     };
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return new Response("Invalid messages format", { status: 400 });
+      return new Response(JSON.stringify({ error: "Invalid messages format" }), {
+        status: 400,
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
     }
 
     const resumeData = resume || profile;
 
     // Get only the last user message to avoid OpenRouter validation issues with multi-turn
     const lastUserMessage = messages.findLast((msg) => msg.role === "user");
-    
+
     if (!lastUserMessage) {
-      return new Response("No user message found", { status: 400 });
+      return new Response(JSON.stringify({ error: "No user message found" }), {
+        status: 400,
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
     }
 
     const system = `You are Achraf Lachgar's AI Twin—an expert AI engineer specializing in generative AI, RAG systems, and LLM fine-tuning. 
@@ -67,17 +91,17 @@ EXPERIENCE:
 - IBM AI Developer Certificate (2025-2026): Generative AI, Prompt Engineering, FastAPI
 - YouCode School (2019-2021): Full-stack web development training
 
-CONTEXT: ${JSON.stringify(
-      {
-        name: resumeData.name,
-        title: resumeData.title,
-        location: resumeData.location,
-        specialties: resumeData.specialties,
-      },
-    )}`;
+CONTEXT: ${JSON.stringify({
+      name: resumeData.name,
+      title: resumeData.title,
+      location: resumeData.location,
+      specialties: resumeData.specialties,
+    })}`;
+
+    console.log("Calling OpenRouter with model:", process.env.OPENROUTER_MODEL);
 
     const result = await streamText({
-      model: openrouter(process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini"),
+      model: openrouter(process.env.OPENROUTER_MODEL),
       system,
       messages: [
         {
@@ -87,9 +111,36 @@ CONTEXT: ${JSON.stringify(
       ],
     });
 
-    return result.toTextStreamResponse();
+    const response = result.toTextStreamResponse();
+    // Add CORS headers to stream response
+    const newHeaders = new Headers(response.headers);
+    Object.entries(headers).forEach(([key, value]) => {
+      newHeaders.set(key, value);
+    });
+
+    return new Response(response.body, {
+      status: response.status,
+      headers: newHeaders,
+    });
   } catch (error) {
     console.error("API error:", error);
-    return new Response(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error details:", { type: error?.constructor?.name, message: errorMessage });
+
+    return new Response(
+      JSON.stringify({ error: "Failed to generate response", details: errorMessage }),
+      { status: 500, headers: { ...headers, "Content-Type": "application/json" } }
+    );
   }
+}
+
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
 }
