@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { generateText, streamText } from "ai";
 import { profile } from "@/lib/profile";
 
 const openrouter = createOpenAI({
@@ -96,9 +96,10 @@ CONTEXT: ${JSON.stringify({
       specialties: resumeData.specialties,
     })}`;
 
-    console.log("[AI Twin] Calling OpenRouter API...");
+    console.log("[AI Twin] Calling OpenRouter API with generateText...");
 
-    const result = await streamText({
+    // Use generateText (buffered) instead of streamText to avoid connection drops
+    const result = await generateText({
       model: openrouter(model),
       system,
       messages: [
@@ -107,26 +108,30 @@ CONTEXT: ${JSON.stringify({
           content: lastUserMessage.content,
         },
       ],
-      onFinish: ({ text }) => {
-        console.log("[AI Twin] Stream completed, tokens:", text.length);
+      maxTokens: 500,
+      temperature: 0.7,
+    });
+
+    console.log("[AI Twin] Successfully got response from OpenRouter, length:", result.text.length);
+
+    // Return as Server-Sent Events for streaming effect on client
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        // Send the entire response as one chunk to simulate streaming
+        controller.enqueue(encoder.encode(result.text));
+        controller.close();
       },
     });
 
-    console.log("[AI Twin] Successfully got stream from OpenRouter");
-
-    const response = result.toTextStreamResponse();
-    const headers = new Headers(response.headers);
-    
-    // Ensure all CORS and streaming headers are set
-    Object.entries(getCommonHeaders()).forEach(([key, value]) => {
-      headers.set(key, value);
-    });
-    headers.set("Content-Type", "text/plain; charset=utf-8");
-    headers.set("Transfer-Encoding", "chunked");
-
-    return new Response(response.body, {
+    return new Response(stream, {
       status: 200,
-      headers,
+      headers: {
+        ...getCommonHeaders(),
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+        "Cache-Control": "no-cache",
+      },
     });
   } catch (error) {
     console.error("[AI Twin] Error:", error);
