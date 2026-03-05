@@ -110,14 +110,19 @@ CONTEXT: ${JSON.stringify({
       ],
     });
 
-    console.log("[AI Twin] Successfully got response from OpenRouter, length:", result.text.length);
+    // Truncate response to stay within token limits
+    const truncatedText = result.text.length > 1000 
+      ? result.text.substring(0, 1000) + "..."
+      : result.text;
+
+    console.log("[AI Twin] Successfully got response from OpenRouter, length:", truncatedText.length);
 
     // Return as Server-Sent Events for streaming effect on client
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {
         // Send the entire response as one chunk to simulate streaming
-        controller.enqueue(encoder.encode(result.text));
+        controller.enqueue(encoder.encode(truncatedText));
         controller.close();
       },
     });
