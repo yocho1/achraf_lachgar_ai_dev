@@ -11,29 +11,27 @@ const openrouter = createOpenAI({
   },
 });
 
-export async function POST(req: Request) {
-  const headers = {
+function getCommonHeaders() {
+  return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
+}
 
+export async function POST(req: Request) {
   try {
+    // Validate environment variables first
     if (!process.env.OPENROUTER_API_KEY) {
-      console.error("Missing OPENROUTER_API_KEY");
-      return new Response(JSON.stringify({ error: "Missing OPENROUTER_API_KEY" }), {
-        status: 500,
-        headers: { ...headers, "Content-Type": "application/json" },
-      });
-    }
-
-    if (!process.env.OPENROUTER_MODEL || !process.env.OPENROUTER_REFERER) {
-      console.error("Missing OPENROUTER_MODEL or OPENROUTER_REFERER");
+      console.error("[AI Twin] Missing OPENROUTER_API_KEY");
       return new Response(
-        JSON.stringify({ error: "Missing required environment variables" }),
-        { status: 500, headers: { ...headers, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Missing OPENROUTER_API_KEY - contact support" }),
+        { status: 500, headers: { ...getCommonHeaders(), "Content-Type": "application/json" } }
       );
     }
+
+    const model = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
+    console.log("[AI Twin] Using model:", model);
 
     const { messages, resume } = (await req.json()) as {
       messages?: Array<{ role: string; content: string }>;
@@ -43,21 +41,21 @@ export async function POST(req: Request) {
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Invalid messages format" }), {
         status: 400,
-        headers: { ...headers, "Content-Type": "application/json" },
+        headers: { ...getCommonHeaders(), "Content-Type": "application/json" },
       });
     }
 
     const resumeData = resume || profile;
-
-    // Get only the last user message to avoid OpenRouter validation issues with multi-turn
     const lastUserMessage = messages.findLast((msg) => msg.role === "user");
 
     if (!lastUserMessage) {
       return new Response(JSON.stringify({ error: "No user message found" }), {
         status: 400,
-        headers: { ...headers, "Content-Type": "application/json" },
+        headers: { ...getCommonHeaders(), "Content-Type": "application/json" },
       });
     }
+
+    console.log("[AI Twin] Processing message:", lastUserMessage.content.substring(0, 50));
 
     const system = `You are Achraf Lachgar's AI Twin—an expert AI engineer specializing in generative AI, RAG systems, and LLM fine-tuning. 
 
@@ -98,10 +96,10 @@ CONTEXT: ${JSON.stringify({
       specialties: resumeData.specialties,
     })}`;
 
-    console.log("Calling OpenRouter with model:", process.env.OPENROUTER_MODEL);
+    console.log("[AI Twin] Calling OpenRouter API...");
 
     const result = await streamText({
-      model: openrouter(process.env.OPENROUTER_MODEL),
+      model: openrouter(model),
       system,
       messages: [
         {
@@ -109,27 +107,48 @@ CONTEXT: ${JSON.stringify({
           content: lastUserMessage.content,
         },
       ],
+      onFinish: ({ text }) => {
+        console.log("[AI Twin] Stream completed, tokens:", text.length);
+      },
     });
+
+    console.log("[AI Twin] Successfully got stream from OpenRouter");
 
     const response = result.toTextStreamResponse();
-    // Add CORS headers to stream response
-    const newHeaders = new Headers(response.headers);
-    Object.entries(headers).forEach(([key, value]) => {
-      newHeaders.set(key, value);
+    const headers = new Headers(response.headers);
+    
+    // Ensure all CORS and streaming headers are set
+    Object.entries(getCommonHeaders()).forEach(([key, value]) => {
+      headers.set(key, value);
     });
+    headers.set("Content-Type", "text/plain; charset=utf-8");
+    headers.set("Transfer-Encoding", "chunked");
 
     return new Response(response.body, {
-      status: response.status,
-      headers: newHeaders,
+      status: 200,
+      headers,
     });
   } catch (error) {
-    console.error("API error:", error);
+    console.error("[AI Twin] Error:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Error details:", { type: error?.constructor?.name, message: errorMessage });
+    const errorStack = error instanceof Error ? error.stack : "";
+
+    console.error("[AI Twin] Error details:", {
+      message: errorMessage,
+      stack: errorStack,
+      type: error?.constructor?.name,
+    });
 
     return new Response(
-      JSON.stringify({ error: "Failed to generate response", details: errorMessage }),
-      { status: 500, headers: { ...headers, "Content-Type": "application/json" } }
+      JSON.stringify({
+        error: "Failed to generate response",
+        message: errorMessage,
+        context: process.env.NODE_ENV === "development" ? errorStack : undefined,
+      }),
+      {
+        status: 500,
+        headers: { ...getCommonHeaders(), "Content-Type": "application/json" },
+      }
     );
   }
 }
@@ -137,10 +156,6 @@ CONTEXT: ${JSON.stringify({
 export async function OPTIONS() {
   return new Response(null, {
     status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
+    headers: getCommonHeaders(),
   });
 }
