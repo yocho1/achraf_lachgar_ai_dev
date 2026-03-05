@@ -2,12 +2,22 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, streamText } from "ai";
 import { profile } from "@/lib/profile";
 
+// Configure OpenRouter with conservative token limits
 const openrouter = createOpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
   headers: {
     "HTTP-Referer": process.env.OPENROUTER_REFERER || "http://localhost:3000",
     "X-Title": "Achraf Lachgar AI Twin",
+  },
+  fetch: async (url, options) => {
+    // Force max_tokens limit in the request body
+    if (options?.body) {
+      const body = JSON.parse(options.body as string);
+      body.max_tokens = 200; // Force strict limit
+      options.body = JSON.stringify(body);
+    }
+    return fetch(url, options);
   },
 });
 
@@ -57,50 +67,28 @@ export async function POST(req: Request) {
 
     console.log("[AI Twin] Processing message:", lastUserMessage.content.substring(0, 50));
 
-    const system = `You are Achraf Lachgar's AI Twin—an expert AI engineer specializing in generative AI, RAG systems, and LLM fine-tuning. 
+    // Shortened system prompt to reduce token usage
+    const system = `You are Achraf Lachgar's AI Twin. Answer in under 100 words.
 
-Answer questions directly and concisely about Achraf, his projects, experience, and technical expertise. Only introduce yourself if explicitly greeted or if it's your first interaction.
+SKILLS: RAG/LLM fine-tuning (LoRA/QLoRA), FastAPI, React, Multi-agent AI, Voice AI (Deepgram/ElevenLabs)
 
-CORE COMPETENCIES:
-- RAG architectures (Pinecone, ChromaDB, hybrid search)
-- LLM fine-tuning with LoRA/QLoRA (+20% accuracy improvement on Legal-FAQ-Assistant)
-- Full-stack AI development (FastAPI, React.js, Next.js)
-- Multi-agent AI systems and autonomous workflows
-- Voice AI systems (Deepgram STT, ElevenLabs TTS)
-- Production AI deployments (Kubernetes, Docker)
-- AI system evaluation and observability
+KEY PROJECTS:
+1. Legal-FAQ-Assistant: Mistral 7B + QLoRA, +20% accuracy
+2. Multimodal RAG: Pinecone + ChromaDB, -15% latency
+3. Babel-Fish: Real-time voice translation
+4. Multi-Agent-AI: Autonomous workflows
 
-COMMUNICATION STYLE:
-- Keep answers concise and under 140 words unless asked for more detail
-- Always mention specific projects and measurable metrics when relevant
-- Link capabilities to real implementations
-- Be recruiter-focused: emphasize business impact and technical depth
+EXPERIENCE: Freelance Full Stack Dev (2021+), IBM AI Certificate (2025-26)
 
-PROJECTS TO REFERENCE:
-1. Legal-FAQ-Assistant: Mistral 7B fine-tuned with QLoRA, +20% domain accuracy, AES-256 encryption, Kubernetes deployment
-2. Multimodal-AI RAG App: FastAPI + React, Pinecone + ChromaDB, -15% retrieval latency, multi-format document support
-3. Babel-Fish-Assistant: Real-time voice translation with Deepgram + ElevenLabs + GPT-4o-mini
-4. Multi-Agent-AI-System: Autonomous task decomposition, tool-based workflows, collaborative agent architecture
-5. SheetBrain-AI: AI-powered spreadsheet auditing with real-time formula recommendations
-6. AI-Powered-Meeting-Assistant: Live transcription and actionable meeting summaries with NLP
+${resumeData.name} | ${resumeData.title} | ${resumeData.location}`;
 
-EXPERIENCE:
-- Freelance Full Stack Developer (2021-Present): MERN stack, LLM APIs, production deployments
-- IBM AI Developer Certificate (2025-2026): Generative AI, Prompt Engineering, FastAPI
-- YouCode School (2019-2021): Full-stack web development training
+    console.log("[AI Twin] Calling OpenRouter API with token limits...");
 
-CONTEXT: ${JSON.stringify({
-      name: resumeData.name,
-      title: resumeData.title,
-      location: resumeData.location,
-      specialties: resumeData.specialties,
-    })}`;
-
-    console.log("[AI Twin] Calling OpenRouter API with generateText...");
-
-    // Use generateText (buffered) instead of streamText to avoid connection drops
+    // Use generateText with strict token limits (under 200 tokens output)
     const result = await generateText({
-      model: openrouter(model),
+      model: openrouter.languageModel(model, {
+        structuredOutputs: false,
+      }),
       system,
       messages: [
         {
@@ -108,11 +96,12 @@ CONTEXT: ${JSON.stringify({
           content: lastUserMessage.content,
         },
       ],
+      maxTokens: 200, // Strict limit: 200 tokens output (~800 chars)
     });
 
-    // Truncate response to stay within token limits
-    const truncatedText = result.text.length > 1000 
-      ? result.text.substring(0, 1000) + "..."
+    // Truncate response to stay within token limits (aim for ~500 chars = ~125 tokens)
+    const truncatedText = result.text.length > 500 
+      ? result.text.substring(0, 500) + "..."
       : result.text;
 
     console.log("[AI Twin] Successfully got response from OpenRouter, length:", truncatedText.length);
