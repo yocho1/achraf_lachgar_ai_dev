@@ -108,8 +108,6 @@ CONTEXT: ${JSON.stringify({
           content: lastUserMessage.content,
         },
       ],
-      maxTokens: 500,
-      temperature: 0.7,
     });
 
     console.log("[AI Twin] Successfully got response from OpenRouter, length:", result.text.length);
